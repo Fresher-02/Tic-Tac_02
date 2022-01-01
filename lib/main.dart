@@ -28,22 +28,30 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> content = [" ", " ", " ", " ", " ", " ", " ", " ", " "];
   bool turn = true;
   int full = 1;
-  int scoreO = 0;
-  int scoreX = 0;
+  int score1 = 0;
+  int score2 = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.yellow,
+        elevation: 10,
+        title: Text(
+          "TIC-TAC-TOE",
+          style: TextStyle(
+              color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
       body: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-              Colors.deepPurple,
-              Colors.purpleAccent,
-              Colors.purple,
-              Colors.pink
+              Colors.black,
+              Colors.black87,
             ])),
         child: Column(
           children: [
@@ -54,16 +62,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   Column(
                     children: [
                       Container(
-                        height: 70,
+                        height: 50,
                         width: 200,
                         child: Text(
-                          "PLAYER-1",
-                          style: TextStyle(fontSize: 30),
+                          "PLAYER-O",
+                          style: TextStyle(
+                              fontSize: 25, color: Colors.yellowAccent),
                         ),
                         alignment: Alignment.bottomCenter,
                       ),
                       Container(
-                        child: Text("score", style: TextStyle(fontSize: 30)),
+                        child: Text("$score2",
+                            style: TextStyle(
+                                fontSize: 22, color: Colors.yellowAccent)),
                         alignment: Alignment.center,
                       ),
                     ],
@@ -71,13 +82,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   Column(
                     children: [
                       Container(
-                        height: 70,
+                        height: 50,
                         width: 200,
-                        child: Text("PLAYER-2", style: TextStyle(fontSize: 30)),
+                        child: Text("PLAYER-X",
+                            style: TextStyle(
+                                fontSize: 25, color: Colors.yellowAccent)),
                         alignment: Alignment.bottomCenter,
                       ),
                       Container(
-                        child: Text("score", style: TextStyle(fontSize: 30)),
+                        child: Text("$score1",
+                            style: TextStyle(
+                                fontSize: 22, color: Colors.yellowAccent)),
                         alignment: Alignment.center,
                       ),
                     ],
@@ -86,10 +101,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             )),
             Expanded(
-              flex: 4,
+              flex: 5,
               child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3),
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 5,
+                      crossAxisSpacing: 5),
                   itemCount: 9,
                   itemBuilder: (BuildContext context, int index) {
                     return GestureDetector(
@@ -99,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
-                            color: Colors.transparent,
+                            color: Colors.yellow,
                             border: Border.all(
                               width: 1,
                               color: Colors.black,
@@ -118,9 +135,24 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
                 child: Container(
               child: Center(
-                child: Text(
-                  "sushant@developer",
-                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      for (int i = 0; i < 9; i++) {
+                        content[i] = " ";
+                      }
+                      full = 0;
+                      score1 = score2 = 0;
+                      turn = true;
+                    });
+                  },
+                  child: Text(
+                    "sushant@developer",
+                    style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 20,
+                        color: Colors.white24),
+                  ),
                 ),
               ),
             )),
@@ -206,6 +238,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         }
                       });
                       full = 0;
+                      turn = true;
                       Navigator.of(context).pop();
                     },
                     child: Text("play again"))
@@ -216,6 +249,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   winner(x) {
+    if (x == "X" && full != 9) {
+      score1 += 1;
+    } else if (x == "O" && full != 9) {
+      score2 += 1;
+    }
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -230,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       for (int i = 0; i < 9; i++) {
                         content[i] = " ";
                       }
-
+                      turn = true;
                       full = 0;
                     });
 
@@ -252,6 +290,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           content[i] = " ";
                         }
                         full = 0;
+                        turn = true;
                       });
                       Navigator.of(context).pop();
                     },
