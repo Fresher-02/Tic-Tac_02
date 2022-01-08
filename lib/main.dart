@@ -1,5 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'package:soundpool/soundpool.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,6 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int full = 1;
   int score1 = 0;
   int score2 = 0;
+  int switch1 = 0;
+  Soundpool pool = Soundpool(streamType: StreamType.notification);
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +86,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ],
                   ),
+                  SizedBox(
+                    width: 10,
+                  ),
                   Column(
                     children: [
                       Container(
                         height: 50,
-                        width: 200,
+                        width: 120,
                         child: Text("PLAYER-X",
                             style: TextStyle(
                                 fontSize: 25, color: Colors.yellowAccent)),
@@ -101,26 +111,46 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             )),
             Expanded(
-              flex: 5,
+              flex: 4,
               child: GridView.builder(
+                  padding: EdgeInsets.all(10),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
-                      mainAxisSpacing: 5,
-                      crossAxisSpacing: 5),
+                      mainAxisSpacing: 7,
+                      crossAxisSpacing: 7),
                   itemCount: 9,
                   itemBuilder: (BuildContext context, int index) {
                     return GestureDetector(
-                      onTap: () {
+                      onTap: () async {
                         tapped(index);
+                        int soundId = await rootBundle
+                            .load("assets/click.m4a")
+                            .then((ByteData soundData) {
+                          return pool.load(soundData);
+                        });
+                        int streamId = await pool.play(soundId);
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.yellow,
-                            border: Border.all(
-                              width: 1,
-                              color: Colors.black,
-                            )),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.white24,
+                                offset: Offset(3.0, 3.0),
+                                // spreadRadius: 3,
+                                blurRadius: 1),
+                            BoxShadow(
+                                color: Colors.white30,
+                                offset: Offset(-2.0, -2.0),
+                                // spreadRadius: 3,
+                                blurRadius: 1)
+                          ],
+                          color: Colors.yellow,
+                          // border: Border.all(
+                          // width: 2,
+                          // color: Colors.black,
+                          // )
+                        ),
                         child: Center(
                           child: Text(
                             // index.toString(),
@@ -136,14 +166,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Container(
               child: Center(
                 child: GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    int soundId = await rootBundle
+                        .load("assets/replay.m4a")
+                        .then((ByteData soundData) {
+                      return pool.load(soundData);
+                    });
+                    int streamId = await pool.play(soundId);
                     setState(() {
                       for (int i = 0; i < 9; i++) {
                         content[i] = " ";
                       }
                       full = 0;
                       score1 = score2 = 0;
-                      turn = true;
+                      // turn = true;
+                      // player.play("assets/replay.mp3");
                     });
                   },
                   child: Text(
@@ -175,11 +212,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  doubletapped(int index) {
-    setState(() {
-      content[index] = " ";
-    });
-  }
+  // doubletapped(int index) {
+  //   setState(() {
+  //     content[index] = " ";
+  //   });
+  // }
 
   check() {
     if (content[0] == content[1] &&
@@ -221,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
         content[2] == content[6] &&
         content[2] != " ") {
       winner(content[2]);
-    } else if (full > 8) {
+    } else if (full == 9) {
       // reset();
       showDialog(
           barrierDismissible: false,
@@ -231,14 +268,21 @@ class _MyHomePageState extends State<MyHomePage> {
               title: Text("ITS A DRAW"),
               actions: [
                 TextButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         for (int i = 0; i < 9; i++) {
                           content[i] = " ";
                         }
                       });
+                      int soundId = await rootBundle
+                          .load("assets/restart.m4a")
+                          .then((ByteData soundData) {
+                        return pool.load(soundData);
+                      });
+                      int streamId = await pool.play(soundId);
                       full = 0;
-                      turn = true;
+                      // turn = true;
+
                       Navigator.of(context).pop();
                     },
                     child: Text("play again"))
@@ -258,46 +302,31 @@ class _MyHomePageState extends State<MyHomePage> {
         barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
-          if (full == 9) {
-            return AlertDialog(
-              title: Text("ITS A DRAW"),
-              actions: [
-                TextButton(
-                  onPressed: () {
+          
+          return AlertDialog(
+            title: Text("WINNER IS " + x),
+            actions: [
+              TextButton(
+                  onPressed: () async {
+                    int soundId = await rootBundle
+                        .load("assets/restart.m4a")
+                        .then((ByteData soundData) {
+                      return pool.load(soundData);
+                    });
+                    int streamId = await pool.play(soundId);
                     setState(() {
                       for (int i = 0; i < 9; i++) {
                         content[i] = " ";
                       }
-                      turn = true;
                       full = 0;
+                      // turn = true;
                     });
-
                     Navigator.of(context).pop();
                   },
-                  child: Text("restart"),
-                )
-              ],
-            );
-          } else {
-            // print(full);
-            return AlertDialog(
-              title: Text("WINNER IS " + x),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      setState(() {
-                        for (int i = 0; i < 9; i++) {
-                          content[i] = " ";
-                        }
-                        full = 0;
-                        turn = true;
-                      });
-                      Navigator.of(context).pop();
-                    },
-                    child: Text("restart"))
-              ],
-            );
-          }
+                  child: Text("restart"))
+            ],
+          );
+          // }
         });
   }
 }
